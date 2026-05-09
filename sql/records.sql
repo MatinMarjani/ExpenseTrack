@@ -5,9 +5,9 @@
 --
 -- Dataset summary:
 --   3 users  |  9 accounts  |  22 categories  |  14 tags
---   52 transactions  |  8 receipts  |  25 transaction-tag links
+--   58 transactions  |  8 receipts  |  25 transaction-tag links
 --
--- Transaction date range: January 2025 – April 2025
+-- Transaction date range: January 2025 – May 2026
 --
 -- Notable design choices for query demonstration:
 --   • Alice's Visa Credit Card and Bob's Mastercard end with negative balances (Q6)
@@ -206,7 +206,15 @@ OVERRIDING SYSTEM VALUE VALUES
 -- ── Carol – March 2025 ────────────────────────────────────────────────────
 (50, 8, NULL, 17,   'income',   800.00, '2025-03-31', '2025-03-31', 'Part-time job paycheck'),
 (51, 8, NULL, 20,   'expense',  180.00, '2025-03-20', '2025-03-20', 'Groceries – March'),
-(52, 8, NULL, 22,   'expense',   50.00, '2025-03-28', '2025-03-28', 'Movie night and snacks');
+(52, 8, NULL, 22,   'expense',   50.00, '2025-03-28', '2025-03-28', 'Movie night and snacks'),
+
+-- ── Alice – May 2026 (current month – makes Q4 return results) ────────────
+(53, 1, NULL, 4,    'expense', 1200.00, '2026-05-01', '2026-05-01', 'May rent payment'),
+(54, 1, NULL, 3,    'expense',  310.00, '2026-05-04', '2026-05-04', 'Grocery run – Trader Joe''s'),
+(55, 1, NULL, 8,    'expense',  105.00, '2026-05-07', '2026-05-07', 'Electric and gas bill'),
+(56, 1, NULL, 5,    'expense',   45.00, '2026-05-09', '2026-05-09', 'Monthly transit pass'),
+(57, 3, NULL, 6,    'expense',   78.00, '2026-05-08', '2026-05-08', 'Dinner out'),
+(58, 1, NULL, 1,    'income',  4000.00, '2026-05-15', '2026-05-15', 'Monthly salary – May');
 
 
 -- =============================================================================
