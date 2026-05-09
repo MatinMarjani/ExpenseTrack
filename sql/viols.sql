@@ -29,6 +29,12 @@
 INSERT INTO Users (email, username, password_hash, full_name)
 VALUES ('alice.johnson@email.com', 'newuser', 'hashed_pw_new', 'New User');
 
+-- ERROR:  duplicate key value violates unique constraint "users_email_key"
+-- Key (email)=(alice.johnson@email.com) already exists. 
+
+-- SQL state: 23505
+-- Detail: Key (email)=(alice.johnson@email.com) already exists.
+
 
 -- =============================================================================
 -- (b) UPDATE creating a KEY violation
@@ -46,6 +52,12 @@ VALUES ('alice.johnson@email.com', 'newuser', 'hashed_pw_new', 'New User');
 UPDATE Accounts
 SET name = 'Chase Savings'
 WHERE account_id = 1;
+
+-- ERROR:  duplicate key value violates unique constraint "accounts_user_id_name_key"
+-- Key (user_id, name)=(1, Chase Savings) already exists. 
+
+-- SQL state: 23505
+-- Detail: Key (user_id, name)=(1, Chase Savings) already exists.
 
 
 -- =============================================================================
@@ -67,6 +79,12 @@ INSERT INTO Transactions (account_id, counterparty_account_id, category_id,
 VALUES (999, NULL, NULL, 'income', 500.00, CURRENT_DATE, CURRENT_DATE,
         'Ghost transaction on non-existent account');
 
+-- ERROR:  insert or update on table "transactions" violates foreign key constraint "transactions_account_id_fkey"
+-- Key (account_id)=(999) is not present in table "accounts". 
+
+-- SQL state: 23503
+-- Detail: Key (account_id)=(999) is not present in table "accounts".
+
 
 -- =============================================================================
 -- (d) DELETE creating a REFERENTIAL INTEGRITY violation
@@ -86,6 +104,12 @@ VALUES (999, NULL, NULL, 'income', 500.00, CURRENT_DATE, CURRENT_DATE,
 DELETE FROM Accounts
 WHERE account_id = 1;
 
+-- ERROR:  update or delete on table "accounts" violates foreign key constraint "transactions_account_id_fkey" on table "transactions"
+-- Key (account_id)=(1) is still referenced from table "transactions". 
+
+-- SQL state: 23503
+-- Detail: Key (account_id)=(1) is still referenced from table "transactions".
+
 
 -- =============================================================================
 -- (e) UPDATE creating a REFERENTIAL INTEGRITY violation
@@ -104,3 +128,9 @@ WHERE account_id = 1;
 UPDATE Transactions
 SET category_id = 999
 WHERE transaction_id = 1;
+
+-- ERROR:  insert or update on table "transactions" violates foreign key constraint "transactions_category_id_fkey"
+-- Key (category_id)=(999) is not present in table "categories". 
+
+-- SQL state: 23503
+-- Detail: Key (category_id)=(999) is not present in table "categories".
