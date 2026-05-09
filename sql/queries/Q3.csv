@@ -1,0 +1,4 @@
+"name","type","initial_balance","current_balance"
+"Chase Checking","checking",1000.00,11195.00
+"Chase Savings","savings",5000.00,6500.00
+"Visa Credit Card","credit_card",0.00,-350.00

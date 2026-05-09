@@ -1,0 +1,22 @@
+"transaction_date","type","amount","description","running_balance"
+"2025-01-01","expense",1200.00,"January rent payment",-200.00
+"2025-01-10","expense",280.00,"Grocery run â€“ Trader Joe's",-480.00
+"2025-01-15","income",4000.00,"Monthly salary â€“ January",3520.00
+"2025-01-20","expense",95.00,"Electric and gas bill",3425.00
+"2025-01-25","transfer",500.00,"Moving surplus to savings",2925.00
+"2025-01-28","expense",45.00,"Monthly transit pass",2880.00
+"2025-02-01","expense",1200.00,"February rent payment",1680.00
+"2025-02-08","expense",310.00,"Grocery run â€“ Whole Foods",1370.00
+"2025-02-15","income",4000.00,"Monthly salary â€“ February",5370.00
+"2025-02-20","income",800.00,"Web design project payment",6170.00
+"2025-02-26","expense",50.00,"Monthly transit pass",6120.00
+"2025-03-01","expense",1200.00,"March rent payment",4920.00
+"2025-03-09","expense",265.00,"Grocery run â€“ Costco",4655.00
+"2025-03-15","income",4000.00,"Monthly salary â€“ March",8655.00
+"2025-03-22","expense",110.00,"Electric and gas bill",8545.00
+"2025-03-28","transfer",1000.00,"Boosting savings fund",7545.00
+"2025-04-01","expense",1200.00,"April rent payment",6345.00
+"2025-04-07","expense",295.00,"Grocery run â€“ Trader Joe's",6050.00
+"2025-04-15","income",4000.00,"Monthly salary â€“ April",10050.00
+"2025-04-20","income",1200.00,"E-commerce site redesign",11250.00
+"2025-04-25","expense",55.00,"Monthly transit pass",11195.00
