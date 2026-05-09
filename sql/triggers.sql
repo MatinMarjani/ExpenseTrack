@@ -34,7 +34,7 @@ BEGIN
     FROM Categories
     WHERE category_id = NEW.category_id;
 
-    IF cat_type <> NEW.type THEN
+    IF cat_type::text <> NEW.type::text THEN
         RAISE EXCEPTION
             'Category type "%" does not match transaction type "%". '
             'An income transaction requires an income category and vice versa.',
