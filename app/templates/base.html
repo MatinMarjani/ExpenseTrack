@@ -37,6 +37,19 @@
                href="/monthly?user_id={{ uid }}">Monthly</a>
             <a class="nav-link {% if request.endpoint == 'insights'     %}active fw-bold{% endif %}"
                href="/insights?user_id={{ uid }}">Insights</a>
+
+            <!-- Manage dropdown -->
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle
+                   {% if request.endpoint in ['manage_categories','manage_tags','add_transaction'] %}active fw-bold{% endif %}"
+                   href="#" role="button" data-bs-toggle="dropdown">Manage</a>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                    <li><a class="dropdown-item" href="/add-transaction?user_id={{ uid }}">+ Add Transaction</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/manage-categories?user_id={{ uid }}">Categories</a></li>
+                    <li><a class="dropdown-item" href="/manage-tags?user_id={{ uid }}">Tags</a></li>
+                </ul>
+            </div>
         </div>
 
         <!-- User switcher -->
@@ -55,6 +68,18 @@
 </nav>
 
 <div class="container pb-5">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="mt-2">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show py-2" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
 </div>
 

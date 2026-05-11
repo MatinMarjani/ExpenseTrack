@@ -24,3 +24,17 @@ def query(sql, params=None):
             return cur.fetchall()
     finally:
         conn.close()
+
+
+def execute(sql, params=None):
+    """Run a write query (INSERT/UPDATE/DELETE) and commit. Returns rows for RETURNING clauses."""
+    conn = _connect()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(sql, params)
+            conn.commit()
+            if cur.description:
+                return cur.fetchall()
+            return []
+    finally:
+        conn.close()

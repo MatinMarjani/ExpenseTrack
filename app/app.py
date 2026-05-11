@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request
-from db import query
+from flask import Flask, render_template, request, redirect, url_for, flash
+from datetime import date
+from db import query, execute
 
 app = Flask(__name__)
+app.secret_key = 'expensetrack-secret-2025'
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -188,6 +190,7 @@ def transactions():
               AND t.type = 'transfer'{date_filter}{tag_filter}{category_filter}
         )
         SELECT
+            l.transaction_id,
             l.transaction_date,
             l.type,
             l.amount,
@@ -388,6 +391,241 @@ def insights():
     return render_template('insights.html',
         users=get_users(), uid=uid, user_name=get_user_name(uid),
         negative=negative, coverage=coverage, unused=unused, idle=idle)
+
+
+# ── Manage Categories ─────────────────────────────────────────────────────────
+
+@app.route('/manage-categories')
+def manage_categories():
+    uid = current_user_id()
+    categories = query("""
+        SELECT c.category_id, c.name, c.type,
+               COUNT(t.transaction_id) AS tx_count
+        FROM   Categories c
+        LEFT JOIN Transactions t ON t.category_id = c.category_id
+        WHERE  c.user_id = %s
+        GROUP  BY c.category_id, c.name, c.type
+        ORDER  BY c.type, c.name
+    """, (uid,))
+    return render_template('manage_categories.html',
+        users=get_users(), uid=uid, user_name=get_user_name(uid),
+        categories=categories)
+
+
+@app.route('/add-category', methods=['POST'])
+def add_category():
+    uid  = int(request.form['user_id'])
+    name = request.form['name'].strip()
+    typ  = request.form['type']
+    if not name:
+        flash('Category name cannot be empty.', 'danger')
+    elif typ not in ('income', 'expense'):
+        flash('Invalid category type.', 'danger')
+    else:
+        existing = query("""
+            SELECT 1 FROM Categories
+            WHERE user_id = %s AND LOWER(name) = LOWER(%s)
+        """, (uid, name))
+        if existing:
+            flash(f'Category "{name}" already exists.', 'warning')
+        else:
+            execute("""
+                INSERT INTO Categories (user_id, name, type)
+                VALUES (%s, %s, %s)
+            """, (uid, name, typ))
+            flash(f'Category "{name}" added.', 'success')
+    return redirect(url_for('manage_categories', user_id=uid))
+
+
+@app.route('/delete-category/<int:cat_id>', methods=['POST'])
+def delete_category(cat_id):
+    uid = int(request.form['user_id'])
+    row = query("""
+        SELECT COUNT(t.transaction_id) AS tx_count
+        FROM   Categories c
+        LEFT JOIN Transactions t ON t.category_id = c.category_id
+        WHERE  c.category_id = %s AND c.user_id = %s
+    """, (cat_id, uid))
+    if not row:
+        flash('Category not found.', 'danger')
+    elif row[0]['tx_count'] > 0:
+        flash('Cannot delete a category that is used by transactions.', 'danger')
+    else:
+        cat = query("SELECT name FROM Categories WHERE category_id = %s AND user_id = %s",
+                    (cat_id, uid))
+        if cat:
+            execute("DELETE FROM Categories WHERE category_id = %s AND user_id = %s",
+                    (cat_id, uid))
+            flash(f'Category "{cat[0]["name"]}" deleted.', 'success')
+    return redirect(url_for('manage_categories', user_id=uid))
+
+
+# ── Manage Tags ───────────────────────────────────────────────────────────────
+
+@app.route('/manage-tags')
+def manage_tags():
+    uid = current_user_id()
+    tags = query("""
+        SELECT tg.tag_id, tg.name,
+               COUNT(tt.transaction_id) AS tx_count
+        FROM   Tags tg
+        LEFT JOIN TransactionTags tt ON tt.tag_id = tg.tag_id
+        WHERE  tg.user_id = %s
+        GROUP  BY tg.tag_id, tg.name
+        ORDER  BY tg.name
+    """, (uid,))
+    return render_template('manage_tags.html',
+        users=get_users(), uid=uid, user_name=get_user_name(uid),
+        tags=tags)
+
+
+@app.route('/add-tag', methods=['POST'])
+def add_tag():
+    uid  = int(request.form['user_id'])
+    name = request.form['name'].strip()
+    if not name:
+        flash('Tag name cannot be empty.', 'danger')
+    else:
+        existing = query("""
+            SELECT 1 FROM Tags
+            WHERE user_id = %s AND LOWER(name) = LOWER(%s)
+        """, (uid, name))
+        if existing:
+            flash(f'Tag "{name}" already exists.', 'warning')
+        else:
+            execute("INSERT INTO Tags (user_id, name) VALUES (%s, %s)", (uid, name))
+            flash(f'Tag "{name}" added.', 'success')
+    return redirect(url_for('manage_tags', user_id=uid))
+
+
+@app.route('/delete-tag/<int:tag_id>', methods=['POST'])
+def delete_tag(tag_id):
+    uid = int(request.form['user_id'])
+    tag = query("SELECT name FROM Tags WHERE tag_id = %s AND user_id = %s", (tag_id, uid))
+    if not tag:
+        flash('Tag not found.', 'danger')
+    else:
+        execute("DELETE FROM Tags WHERE tag_id = %s AND user_id = %s", (tag_id, uid))
+        flash(f'Tag "{tag[0]["name"]}" deleted.', 'success')
+    return redirect(url_for('manage_tags', user_id=uid))
+
+
+# ── Add / Delete Transaction ──────────────────────────────────────────────────
+
+@app.route('/add-transaction', methods=['GET', 'POST'])
+def add_transaction():
+    uid = current_user_id()
+
+    accounts = query("""
+        SELECT account_id, name FROM Accounts
+        WHERE user_id = %s ORDER BY name
+    """, (uid,))
+
+    categories = query("""
+        SELECT category_id, name, type FROM Categories
+        WHERE user_id = %s ORDER BY type, name
+    """, (uid,))
+
+    tags = query("""
+        SELECT tag_id, name FROM Tags
+        WHERE user_id = %s ORDER BY name
+    """, (uid,))
+
+    if request.method == 'POST':
+        account_id   = int(request.form['account_id'])
+        typ          = request.form['type']
+        amount_raw   = request.form.get('amount', '').strip()
+        txn_date     = request.form.get('txn_date', '').strip() or str(date.today())
+        description  = request.form.get('description', '').strip() or None
+        category_id  = request.form.get('category_id') or None
+        counterparty = request.form.get('counterparty_account_id') or None
+        tag_ids      = request.form.getlist('tag_ids')
+
+        # Validate
+        errors = []
+        try:
+            amount = float(amount_raw)
+            if amount <= 0:
+                errors.append('Amount must be positive.')
+        except ValueError:
+            errors.append('Invalid amount.')
+
+        if typ not in ('income', 'expense', 'transfer'):
+            errors.append('Invalid transaction type.')
+
+        if typ in ('income', 'expense') and not category_id:
+            errors.append('Category is required for income and expense transactions.')
+
+        if typ == 'transfer':
+            category_id = None
+            if not counterparty:
+                errors.append('Counterparty account is required for transfers.')
+            elif int(counterparty) == account_id:
+                errors.append('Cannot transfer to the same account.')
+
+        # Ownership check
+        owned = query("""
+            SELECT 1 FROM Accounts WHERE account_id = %s AND user_id = %s
+        """, (account_id, uid))
+        if not owned:
+            errors.append('Account not found.')
+
+        if errors:
+            for e in errors:
+                flash(e, 'danger')
+            return render_template('add_transaction.html',
+                users=get_users(), uid=uid, user_name=get_user_name(uid),
+                accounts=accounts, categories=categories, tags=tags,
+                form=request.form, selected_tag_ids=tag_ids,
+                today=str(date.today()))
+
+        rows = execute("""
+            INSERT INTO Transactions
+                (account_id, type, amount, transaction_date, description,
+                 category_id, counterparty_account_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING transaction_id
+        """, (account_id, typ, amount, txn_date, description,
+              int(category_id) if category_id else None,
+              int(counterparty) if counterparty else None))
+
+        if rows and tag_ids:
+            txn_id = rows[0]['transaction_id']
+            for tid in tag_ids:
+                execute("""
+                    INSERT INTO TransactionTags (transaction_id, tag_id)
+                    VALUES (%s, %s) ON CONFLICT DO NOTHING
+                """, (txn_id, int(tid)))
+
+        flash('Transaction added successfully.', 'success')
+        return redirect(url_for('transactions', user_id=uid, account_id=account_id))
+
+    return render_template('add_transaction.html',
+        users=get_users(), uid=uid, user_name=get_user_name(uid),
+        accounts=accounts, categories=categories, tags=tags,
+        form={}, selected_tag_ids=[], today=str(date.today()))
+
+
+@app.route('/delete-transaction/<int:txn_id>', methods=['POST'])
+def delete_transaction(txn_id):
+    uid = int(request.form['user_id'])
+    account_id = request.form.get('account_id', '')
+
+    row = query("""
+        SELECT t.transaction_id FROM Transactions t
+        JOIN Accounts a ON a.account_id = t.account_id
+        WHERE t.transaction_id = %s AND a.user_id = %s
+    """, (txn_id, uid))
+
+    if not row:
+        flash('Transaction not found.', 'danger')
+    else:
+        execute("DELETE FROM Transactions WHERE transaction_id = %s", (txn_id,))
+        flash('Transaction deleted.', 'success')
+
+    if account_id:
+        return redirect(url_for('transactions', user_id=uid, account_id=account_id))
+    return redirect(url_for('transactions', user_id=uid))
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────

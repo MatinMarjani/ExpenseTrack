@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Add Transaction{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Add Transaction</h2>
+    <span class="text-muted">{{ user_name }}</span>
+</div>
+
+<div class="row justify-content-center">
+<div class="col-lg-7">
+<div class="card shadow-sm">
+<div class="card-body p-4">
+
+<form method="post" action="/add-transaction?user_id={{ uid }}">
+    <input type="hidden" name="user_id" value="{{ uid }}">
+
+    <!-- Account -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Account <span class="text-danger">*</span></label>
+        <select name="account_id" class="form-select" required>
+            {% for acc in accounts %}
+            <option value="{{ acc.account_id }}"
+                {% if form.get('account_id')|string == acc.account_id|string %}selected{% endif %}>
+                {{ acc.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Type -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
+        <select name="type" id="txn-type" class="form-select" required onchange="onTypeChange()">
+            <option value="expense" {% if form.get('type','expense') == 'expense' %}selected{% endif %}>Expense</option>
+            <option value="income"  {% if form.get('type') == 'income' %}selected{% endif %}>Income</option>
+            <option value="transfer"{% if form.get('type') == 'transfer' %}selected{% endif %}>Transfer</option>
+        </select>
+    </div>
+
+    <!-- Amount -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Amount <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input type="number" name="amount" class="form-control" step="0.01" min="0.01"
+                   placeholder="0.00" value="{{ form.get('amount', '') }}" required>
+        </div>
+    </div>
+
+    <!-- Date -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Date</label>
+        <input type="date" name="txn_date" class="form-control"
+               value="{{ form.get('txn_date') or today }}">
+    </div>
+
+    <!-- Description -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Description</label>
+        <input type="text" name="description" class="form-control" maxlength="255"
+               placeholder="Optional note" value="{{ form.get('description', '') }}">
+    </div>
+
+    <!-- Category (hidden for transfer) -->
+    <div class="mb-3" id="category-row">
+        <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+        <select name="category_id" id="category-select" class="form-select">
+            <option value="">-- Select Category --</option>
+            {% for cat in categories %}
+            <option value="{{ cat.category_id }}"
+                    data-type="{{ cat.type }}"
+                    {% if form.get('category_id')|string == cat.category_id|string %}selected{% endif %}>
+                {{ cat.name }} ({{ cat.type }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Counterparty account (shown only for transfer) -->
+    <div class="mb-3 d-none" id="counterparty-row">
+        <label class="form-label fw-semibold">Transfer To <span class="text-danger">*</span></label>
+        <select name="counterparty_account_id" class="form-select">
+            <option value="">-- Select Destination Account --</option>
+            {% for acc in accounts %}
+            <option value="{{ acc.account_id }}"
+                {% if form.get('counterparty_account_id')|string == acc.account_id|string %}selected{% endif %}>
+                {{ acc.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Tags -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Tags <span class="text-muted small">(optional)</span></label>
+        {% if tags %}
+        <div class="d-flex flex-wrap gap-2 border rounded p-2 bg-light">
+            {% for tag in tags %}
+            <div class="form-check me-2">
+                <input class="form-check-input" type="checkbox"
+                       name="tag_ids" value="{{ tag.tag_id }}" id="tag-{{ tag.tag_id }}"
+                       {% if tag.tag_id|string in selected_tag_ids %}checked{% endif %}>
+                <label class="form-check-label" for="tag-{{ tag.tag_id }}">{{ tag.name }}</label>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0">No tags yet. <a href="/manage-tags?user_id={{ uid }}">Add some tags</a> first.</p>
+        {% endif %}
+    </div>
+
+    <div class="d-flex gap-2 justify-content-end mt-4">
+        <a href="/transactions?user_id={{ uid }}" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Transaction</button>
+    </div>
+</form>
+
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function onTypeChange() {
+    const type = document.getElementById('txn-type').value;
+    const catRow   = document.getElementById('category-row');
+    const cpRow    = document.getElementById('counterparty-row');
+    const catSel   = document.getElementById('category-select');
+
+    if (type === 'transfer') {
+        catRow.classList.add('d-none');
+        cpRow.classList.remove('d-none');
+        catSel.removeAttribute('required');
+    } else {
+        catRow.classList.remove('d-none');
+        cpRow.classList.add('d-none');
+        catSel.setAttribute('required', '');
+    }
+
+    // Filter category options by type
+    Array.from(catSel.options).forEach(opt => {
+        if (!opt.value) return; // keep placeholder
+        opt.hidden = opt.dataset.type !== type;
+    });
+    // Deselect hidden options
+    if (catSel.options[catSel.selectedIndex] &&
+        catSel.options[catSel.selectedIndex].hidden) {
+        catSel.value = '';
+    }
+}
+
+// Run on load to set initial state
+onTypeChange();
+
+// Set default date to today if empty
+const dateInput = document.querySelector('[name=txn_date]');
+if (!dateInput.value) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+}
+</script>
+{% endblock %}

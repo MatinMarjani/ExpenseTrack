@@ -76,6 +76,7 @@
             <th>Tags</th>
             <th class="text-end">Amount</th>
             {% if show_balance %}<th class="text-end">Balance After</th>{% endif %}
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -118,6 +119,14 @@
                 ${{ "%.2f" | format(t.running_balance) }}
             </td>
             {% endif %}
+            <td class="text-end">
+                <form method="post" action="/delete-transaction/{{ t.transaction_id }}"
+                      onsubmit="return confirm('Delete this transaction?')">
+                    <input type="hidden" name="user_id"    value="{{ uid }}">
+                    <input type="hidden" name="account_id" value="{{ account_id }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">&#128465;</button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
