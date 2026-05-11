@@ -6,7 +6,7 @@
 -- Enforces the four cross-table business rules that cannot be expressed
 -- as CHECK constraints because they require looking up other tables.
 --
--- Run this file after schema.sql.
+-- Run this file after table.sql.
 -- =============================================================================
 
 
@@ -16,7 +16,7 @@
 -- Rule: if a transaction has a category, the category's type must equal
 --       the transaction's type (income↔income, expense↔expense).
 --       Transfer transactions cannot have a category at all — that is
---       already blocked by the CHECK constraint in schema.sql, so this
+--       already blocked by the CHECK constraint in table.sql, so this
 --       trigger only needs to handle income/expense.
 -- Fires: BEFORE INSERT OR UPDATE on Transactions
 -- =============================================================================
