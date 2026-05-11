@@ -41,11 +41,12 @@
             <!-- Manage dropdown -->
             <div class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle
-                   {% if request.endpoint in ['manage_categories','manage_tags','add_transaction'] %}active fw-bold{% endif %}"
+                   {% if request.endpoint in ['manage_accounts','manage_categories','manage_tags','add_transaction'] %}active fw-bold{% endif %}"
                    href="#" role="button" data-bs-toggle="dropdown">Manage</a>
                 <ul class="dropdown-menu dropdown-menu-dark">
                     <li><a class="dropdown-item" href="/add-transaction?user_id={{ uid }}">+ Add Transaction</a></li>
                     <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/manage-accounts?user_id={{ uid }}">Accounts</a></li>
                     <li><a class="dropdown-item" href="/manage-categories?user_id={{ uid }}">Categories</a></li>
                     <li><a class="dropdown-item" href="/manage-tags?user_id={{ uid }}">Tags</a></li>
                 </ul>

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Manage Accounts{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Manage Accounts</h2>
+    <span class="text-muted">{{ user_name }}</span>
+</div>
+
+<div class="row g-4">
+
+    <!-- Add form -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">New Account</div>
+            <div class="card-body">
+                <form method="post" action="/add-account">
+                    <input type="hidden" name="user_id" value="{{ uid }}">
+                    <div class="mb-3">
+                        <label class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" maxlength="100"
+                               placeholder="e.g. Chase Checking" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type <span class="text-danger">*</span></label>
+                        <select name="type" class="form-select" required>
+                            {% for t in account_types %}
+                            <option value="{{ t }}">{{ t.replace('_', ' ').title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Initial Balance</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="initial_balance" class="form-control"
+                                   step="0.01" value="0.00" placeholder="0.00">
+                        </div>
+                        <div class="form-text">Use a negative value if you are starting with existing debt.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Add Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account list -->
+    <div class="col-md-8">
+        {% if accounts %}
+        <table class="table table-hover shadow-sm">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th class="text-end">Initial Balance</th>
+                    <th class="text-center">Transactions</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acc in accounts %}
+                <tr>
+                    <td class="fw-semibold">{{ acc.name }}</td>
+                    <td><span class="badge bg-secondary">{{ acc.type.replace('_', ' ').title() }}</span></td>
+                    <td class="text-end">${{ "%.2f" | format(acc.initial_balance) }}</td>
+                    <td class="text-center">
+                        {% if acc.tx_count > 0 %}
+                        <span class="badge bg-secondary">{{ acc.tx_count }}</span>
+                        {% else %}
+                        <span class="text-muted">0</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        {% if acc.tx_count > 0 %}
+                        <button class="btn btn-sm btn-outline-secondary" disabled
+                                title="Account has {{ acc.tx_count }} transaction(s)">Delete</button>
+                        {% else %}
+                        <form method="post" action="/delete-account/{{ acc.account_id }}"
+                              onsubmit="return confirm('Delete account &quot;{{ acc.name }}&quot;?')">
+                            <input type="hidden" name="user_id" value="{{ uid }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-info">No accounts yet. Add one using the form.</div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

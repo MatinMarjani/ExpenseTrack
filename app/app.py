@@ -87,8 +87,16 @@ def transactions():
         ORDER  BY name
     """, (uid,))
 
+    if not accounts:
+        return render_template('transactions.html',
+            users=get_users(), uid=uid, user_name=get_user_name(uid),
+            accounts=[], account_id=None, transactions=[],
+            start_date='', end_date='', tags=[], tag_id='',
+            categories=[], category_id='', all_categories=[], all_tags=[],
+            show_balance=True, total_in=0, total_out=0, net=0)
+
     account_id = int(request.args.get('account_id',
-                     accounts[0]['account_id'] if accounts else 1))
+                     accounts[0]['account_id']))
 
     start_date  = request.args.get('start_date')  or None
     end_date    = request.args.get('end_date')    or None
@@ -420,6 +428,85 @@ def insights():
     return render_template('insights.html',
         users=get_users(), uid=uid, user_name=get_user_name(uid),
         negative=negative, coverage=coverage, unused=unused, idle=idle)
+
+
+# ── Manage Accounts ───────────────────────────────────────────────────────────
+
+ACCOUNT_TYPES = ('checking', 'savings', 'cash', 'credit_card')
+
+@app.route('/manage-accounts')
+def manage_accounts():
+    uid = current_user_id()
+    accounts = query("""
+        SELECT a.account_id, a.name, a.type, a.initial_balance,
+               COUNT(t.transaction_id) AS tx_count
+        FROM   Accounts a
+        LEFT JOIN Transactions t
+               ON t.account_id = a.account_id
+               OR t.counterparty_account_id = a.account_id
+        WHERE  a.user_id = %s
+        GROUP  BY a.account_id, a.name, a.type, a.initial_balance
+        ORDER  BY a.name
+    """, (uid,))
+    return render_template('manage_accounts.html',
+        users=get_users(), uid=uid, user_name=get_user_name(uid),
+        accounts=accounts, account_types=ACCOUNT_TYPES)
+
+
+@app.route('/add-account', methods=['POST'])
+def add_account():
+    uid     = int(request.form['user_id'])
+    name    = request.form['name'].strip()
+    typ     = request.form['type']
+    balance = request.form.get('initial_balance', '0').strip()
+
+    if not name:
+        flash('Account name cannot be empty.', 'danger')
+    elif typ not in ACCOUNT_TYPES:
+        flash('Invalid account type.', 'danger')
+    else:
+        try:
+            initial_balance = float(balance)
+        except ValueError:
+            flash('Invalid initial balance.', 'danger')
+            return redirect(url_for('manage_accounts', user_id=uid))
+
+        existing = query("""
+            SELECT 1 FROM Accounts WHERE user_id = %s AND LOWER(name) = LOWER(%s)
+        """, (uid, name))
+        if existing:
+            flash(f'Account "{name}" already exists.', 'warning')
+        else:
+            execute("""
+                INSERT INTO Accounts (user_id, name, type, initial_balance)
+                VALUES (%s, %s, %s, %s)
+            """, (uid, name, typ, initial_balance))
+            flash(f'Account "{name}" added.', 'success')
+    return redirect(url_for('manage_accounts', user_id=uid))
+
+
+@app.route('/delete-account/<int:acct_id>', methods=['POST'])
+def delete_account(acct_id):
+    uid = int(request.form['user_id'])
+    row = query("""
+        SELECT a.name,
+               COUNT(t.transaction_id) AS tx_count
+        FROM   Accounts a
+        LEFT JOIN Transactions t
+               ON t.account_id = a.account_id
+               OR t.counterparty_account_id = a.account_id
+        WHERE  a.account_id = %s AND a.user_id = %s
+        GROUP  BY a.name
+    """, (acct_id, uid))
+    if not row:
+        flash('Account not found.', 'danger')
+    elif row[0]['tx_count'] > 0:
+        flash('Cannot delete an account that has transactions.', 'danger')
+    else:
+        execute("DELETE FROM Accounts WHERE account_id = %s AND user_id = %s",
+                (acct_id, uid))
+        flash(f'Account "{row[0]["name"]}" deleted.', 'success')
+    return redirect(url_for('manage_accounts', user_id=uid))
 
 
 # ── Manage Categories ─────────────────────────────────────────────────────────
