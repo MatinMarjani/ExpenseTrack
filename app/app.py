@@ -203,7 +203,7 @@ def transactions():
                 OVER (ORDER BY l.transaction_date, l.transaction_id) AS running_balance
         FROM ledger l
         CROSS JOIN (SELECT initial_balance FROM Accounts WHERE account_id = %s) a
-        ORDER BY l.transaction_date, l.transaction_id
+        ORDER BY l.transaction_date DESC, l.transaction_id DESC
     """, (account_id, *date_params, *tag_params, *category_params,
           account_id, *date_params, *tag_params, *category_params,
           account_id))
