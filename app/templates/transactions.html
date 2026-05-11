@@ -123,6 +123,15 @@
     </tbody>
 </table>
 </div>
+<div class="d-flex justify-content-end gap-4 mt-2 pe-1 small">
+    <span class="text-muted">In: <span class="positive">+${{ "%.2f" | format(total_in) }}</span></span>
+    <span class="text-muted">Out: <span class="negative">-${{ "%.2f" | format(total_out) }}</span></span>
+    <span class="fw-semibold">Net:
+        <span class="{{ 'positive' if net >= 0 else 'negative' }}">
+            {% if net >= 0 %}+{% endif %}${{ "%.2f" | format(net) }}
+        </span>
+    </span>
+</div>
 {% else %}
 <div class="alert alert-info">No transactions found for the selected filters.</div>
 {% endif %}
