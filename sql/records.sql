@@ -1,13 +1,13 @@
 -- =============================================================================
--- ExpenseTrack – Seed Data (records.sql)
--- CIS761 Class Project – Matin Marjani
+-- ExpenseTrack -Seed Data (records.sql)
+-- CIS761 Class Project -Matin Marjani
 -- PostgreSQL
 --
 -- Dataset summary:
 --   3 users  |  9 accounts  |  22 categories  |  14 tags
 --   58 transactions  |  8 receipts  |  25 transaction-tag links
 --
--- Transaction date range: January 2025 – May 2026
+-- Transaction date range: January 2025 -May 2026
 --
 -- Notable design choices for query demonstration:
 --   • Alice's Visa Credit Card and Bob's Mastercard end with negative balances (Q6)
@@ -64,30 +64,30 @@ OVERRIDING SYSTEM VALUE VALUES
 
 INSERT INTO Categories (category_id, user_id, name, type)
 OVERRIDING SYSTEM VALUE VALUES
--- Alice – income
+-- Alice -income
 (1,  1, 'Salary',             'income'),
 (2,  1, 'Freelance',          'income'),
--- Alice – expense
+-- Alice -expense
 (3,  1, 'Groceries',          'expense'),
 (4,  1, 'Rent',               'expense'),
 (5,  1, 'Transportation',     'expense'),
 (6,  1, 'Dining Out',         'expense'),
 (7,  1, 'Entertainment',      'expense'),   -- intentionally unused; see Q15
 (8,  1, 'Utilities',          'expense'),
--- Bob – income
+-- Bob -income
 (9,  2, 'Salary',             'income'),
 (10, 2, 'Investment Returns', 'income'),
--- Bob – expense
+-- Bob -expense
 (11, 2, 'Groceries',          'expense'),
 (12, 2, 'Mortgage',           'expense'),
 (13, 2, 'Car Insurance',      'expense'),
 (14, 2, 'Healthcare',         'expense'),
 (15, 2, 'Subscriptions',      'expense'),
 (16, 2, 'Travel',             'expense'),
--- Carol – income
+-- Carol -income
 (17, 3, 'Part-time Job',      'income'),
 (18, 3, 'Scholarship',        'income'),
--- Carol – expense
+-- Carol -expense
 (19, 3, 'Tuition',            'expense'),
 (20, 3, 'Food',               'expense'),
 (21, 3, 'Transportation',     'expense'),
@@ -136,85 +136,85 @@ INSERT INTO Transactions
      type, amount, transaction_date, entry_date, description)
 OVERRIDING SYSTEM VALUE VALUES
 
--- ── Alice – January 2025 ──────────────────────────────────────────────────
-( 1, 1, NULL, 1,    'income',  4000.00, '2025-01-15', '2025-01-15', 'Monthly salary – January'),
+-- ── Alice -January 2025 ──────────────────────────────────────────────────
+( 1, 1, NULL, 1,    'income',  4000.00, '2025-01-15', '2025-01-15', 'Monthly salary - January'),
 ( 2, 1, NULL, 4,    'expense', 1200.00, '2025-01-01', '2025-01-01', 'January rent payment'),
-( 3, 1, NULL, 3,    'expense',  280.00, '2025-01-10', '2025-01-10', 'Grocery run – Trader Joe''s'),
+( 3, 1, NULL, 3,    'expense',  280.00, '2025-01-10', '2025-01-10', 'Grocery run - Trader Joe''s'),
 ( 4, 1, NULL, 8,    'expense',   95.00, '2025-01-20', '2025-01-20', 'Electric and gas bill'),
 ( 5, 1, 2,    NULL, 'transfer', 500.00, '2025-01-25', '2025-01-25', 'Moving surplus to savings'),
 ( 6, 3, NULL, 6,    'expense',   65.00, '2025-01-22', '2025-01-22', 'Dinner at Olive Garden'),
 ( 7, 1, NULL, 5,    'expense',   45.00, '2025-01-28', '2025-01-28', 'Monthly transit pass'),
 
--- ── Alice – February 2025 ─────────────────────────────────────────────────
-( 8, 1, NULL, 1,    'income',  4000.00, '2025-02-15', '2025-02-15', 'Monthly salary – February'),
+-- ── Alice -February 2025 ─────────────────────────────────────────────────
+( 8, 1, NULL, 1,    'income',  4000.00, '2025-02-15', '2025-02-15', 'Monthly salary - February'),
 ( 9, 1, NULL, 4,    'expense', 1200.00, '2025-02-01', '2025-02-01', 'February rent payment'),
-(10, 1, NULL, 3,    'expense',  310.00, '2025-02-08', '2025-02-08', 'Grocery run – Whole Foods'),
+(10, 1, NULL, 3,    'expense',  310.00, '2025-02-08', '2025-02-08', 'Grocery run - Whole Foods'),
 (11, 1, NULL, 2,    'income',   800.00, '2025-02-20', '2025-02-21', 'Web design project payment'),
 (12, 3, NULL, 6,    'expense',   90.00, '2025-02-14', '2025-02-14', 'Valentine''s Day dinner'),
 (13, 1, NULL, 5,    'expense',   50.00, '2025-02-26', '2025-02-26', 'Monthly transit pass'),
 
--- ── Alice – March 2025 ────────────────────────────────────────────────────
-(14, 1, NULL, 1,    'income',  4000.00, '2025-03-15', '2025-03-15', 'Monthly salary – March'),
+-- ── Alice -March 2025 ────────────────────────────────────────────────────
+(14, 1, NULL, 1,    'income',  4000.00, '2025-03-15', '2025-03-15', 'Monthly salary - March'),
 (15, 1, NULL, 4,    'expense', 1200.00, '2025-03-01', '2025-03-01', 'March rent payment'),
-(16, 1, NULL, 3,    'expense',  265.00, '2025-03-09', '2025-03-09', 'Grocery run – Costco'),
+(16, 1, NULL, 3,    'expense',  265.00, '2025-03-09', '2025-03-09', 'Grocery run - Costco'),
 (17, 1, NULL, 8,    'expense',  110.00, '2025-03-22', '2025-03-22', 'Electric and gas bill'),
 (18, 1, 2,    NULL, 'transfer',1000.00, '2025-03-28', '2025-03-28', 'Boosting savings fund'),
 (19, 3, NULL, 6,    'expense',   75.00, '2025-03-18', '2025-03-18', 'Team dinner outing'),
 
--- ── Alice – April 2025 ────────────────────────────────────────────────────
-(20, 1, NULL, 1,    'income',  4000.00, '2025-04-15', '2025-04-15', 'Monthly salary – April'),
+-- ── Alice -April 2025 ────────────────────────────────────────────────────
+(20, 1, NULL, 1,    'income',  4000.00, '2025-04-15', '2025-04-15', 'Monthly salary - April'),
 (21, 1, NULL, 4,    'expense', 1200.00, '2025-04-01', '2025-04-01', 'April rent payment'),
-(22, 1, NULL, 3,    'expense',  295.00, '2025-04-07', '2025-04-07', 'Grocery run – Trader Joe''s'),
+(22, 1, NULL, 3,    'expense',  295.00, '2025-04-07', '2025-04-07', 'Grocery run - Trader Joe''s'),
 (23, 1, NULL, 2,    'income',  1200.00, '2025-04-20', '2025-04-20', 'E-commerce site redesign'),
 (24, 1, NULL, 5,    'expense',   55.00, '2025-04-25', '2025-04-25', 'Monthly transit pass'),
-(25, 3, NULL, 6,    'expense',  120.00, '2025-04-30', '2025-04-30', 'Farewell dinner – vacation eve'),
+(25, 3, NULL, 6,    'expense',  120.00, '2025-04-30', '2025-04-30', 'Farewell dinner - vacation eve'),
 
--- ── Bob – January 2025 ────────────────────────────────────────────────────
-(26, 4, NULL, 9,    'income',  6500.00, '2025-01-15', '2025-01-15', 'Monthly salary – January'),
-(27, 4, NULL, 12,   'expense', 1800.00, '2025-01-01', '2025-01-01', 'Mortgage payment – January'),
+-- ── Bob -January 2025 ────────────────────────────────────────────────────
+(26, 4, NULL, 9,    'income',  6500.00, '2025-01-15', '2025-01-15', 'Monthly salary - January'),
+(27, 4, NULL, 12,   'expense', 1800.00, '2025-01-01', '2025-01-01', 'Mortgage payment - January'),
 (28, 4, NULL, 11,   'expense',  450.00, '2025-01-12', '2025-01-12', 'Weekly groceries x3'),
 (29, 4, NULL, 13,   'expense',  180.00, '2025-01-08', '2025-01-08', 'Car insurance premium'),
 (30, 7, NULL, 15,   'expense',   45.00, '2025-01-05', '2025-01-05', 'Netflix + Spotify subscriptions'),
 (31, 4, 5,    NULL, 'transfer',1000.00, '2025-01-28', '2025-01-28', 'Monthly savings transfer'),
 
--- ── Bob – February 2025 ───────────────────────────────────────────────────
-(32, 4, NULL, 9,    'income',  6500.00, '2025-02-15', '2025-02-15', 'Monthly salary – February'),
-(33, 4, NULL, 12,   'expense', 1800.00, '2025-02-01', '2025-02-01', 'Mortgage payment – February'),
-(34, 4, NULL, 11,   'expense',  380.00, '2025-02-10', '2025-02-10', 'Groceries – February'),
+-- ── Bob -February 2025 ───────────────────────────────────────────────────
+(32, 4, NULL, 9,    'income',  6500.00, '2025-02-15', '2025-02-15', 'Monthly salary - February'),
+(33, 4, NULL, 12,   'expense', 1800.00, '2025-02-01', '2025-02-01', 'Mortgage payment - February'),
+(34, 4, NULL, 11,   'expense',  380.00, '2025-02-10', '2025-02-10', 'Groceries - February'),
 (35, 5, NULL, 10,   'income',   250.00, '2025-02-28', '2025-02-28', 'Quarterly dividend payment'),
 (36, 7, NULL, 14,   'expense',  200.00, '2025-02-15', '2025-02-15', 'Dentist appointment'),
 (37, 7, NULL, 15,   'expense',   45.00, '2025-02-05', '2025-02-05', 'Netflix + Spotify subscriptions'),
 
--- ── Bob – March 2025 ──────────────────────────────────────────────────────
-(38, 4, NULL, 9,    'income',  6500.00, '2025-03-15', '2025-03-15', 'Monthly salary – March'),
-(39, 4, NULL, 12,   'expense', 1800.00, '2025-03-01', '2025-03-01', 'Mortgage payment – March'),
-(40, 4, NULL, 11,   'expense',  420.00, '2025-03-09', '2025-03-09', 'Groceries – March'),
+-- ── Bob -March 2025 ──────────────────────────────────────────────────────
+(38, 4, NULL, 9,    'income',  6500.00, '2025-03-15', '2025-03-15', 'Monthly salary - March'),
+(39, 4, NULL, 12,   'expense', 1800.00, '2025-03-01', '2025-03-01', 'Mortgage payment - March'),
+(40, 4, NULL, 11,   'expense',  420.00, '2025-03-09', '2025-03-09', 'Groceries - March'),
 (41, 7, NULL, 16,   'expense', 1200.00, '2025-03-20', '2025-03-20', 'Spring break flights and hotel'),
 (42, 4, 6,    NULL, 'transfer', 500.00, '2025-03-25', '2025-03-25', 'Cash for weekend trip'),
 
--- ── Carol – January 2025 ──────────────────────────────────────────────────
+-- ── Carol -January 2025 ──────────────────────────────────────────────────
 (43, 8, NULL, 17,   'income',   800.00, '2025-01-31', '2025-01-31', 'Part-time job paycheck'),
 (44, 8, NULL, 20,   'expense',  200.00, '2025-01-15', '2025-01-15', 'Groceries and meal prep'),
-(45, 8, NULL, 21,   'expense',   60.00, '2025-01-20', '2025-01-20', 'Bus pass – January'),
+(45, 8, NULL, 21,   'expense',   60.00, '2025-01-20', '2025-01-20', 'Bus pass - January'),
 
--- ── Carol – February 2025 ─────────────────────────────────────────────────
+-- ── Carol -February 2025 ─────────────────────────────────────────────────
 (46, 8, NULL, 17,   'income',   800.00, '2025-02-28', '2025-02-28', 'Part-time job paycheck'),
 (47, 8, NULL, 18,   'income',  1500.00, '2025-02-01', '2025-02-01', 'Spring semester scholarship'),
 (48, 8, NULL, 19,   'expense', 1200.00, '2025-02-05', '2025-02-05', 'Spring semester tuition payment'),
-(49, 8, NULL, 20,   'expense',  220.00, '2025-02-18', '2025-02-18', 'Groceries – February'),
+(49, 8, NULL, 20,   'expense',  220.00, '2025-02-18', '2025-02-18', 'Groceries - February'),
 
--- ── Carol – March 2025 ────────────────────────────────────────────────────
+-- ── Carol -March 2025 ────────────────────────────────────────────────────
 (50, 8, NULL, 17,   'income',   800.00, '2025-03-31', '2025-03-31', 'Part-time job paycheck'),
-(51, 8, NULL, 20,   'expense',  180.00, '2025-03-20', '2025-03-20', 'Groceries – March'),
+(51, 8, NULL, 20,   'expense',  180.00, '2025-03-20', '2025-03-20', 'Groceries - March'),
 (52, 8, NULL, 22,   'expense',   50.00, '2025-03-28', '2025-03-28', 'Movie night and snacks'),
 
--- ── Alice – May 2026 (current month – makes Q4 return results) ────────────
+-- ── Alice -May 2026 (current month -makes Q4 return results) ────────────
 (53, 1, NULL, 4,    'expense', 1200.00, '2026-05-01', '2026-05-01', 'May rent payment'),
-(54, 1, NULL, 3,    'expense',  310.00, '2026-05-04', '2026-05-04', 'Grocery run – Trader Joe''s'),
+(54, 1, NULL, 3,    'expense',  310.00, '2026-05-04', '2026-05-04', 'Grocery run - Trader Joe''s'),
 (55, 1, NULL, 8,    'expense',  105.00, '2026-05-07', '2026-05-07', 'Electric and gas bill'),
 (56, 1, NULL, 5,    'expense',   45.00, '2026-05-09', '2026-05-09', 'Monthly transit pass'),
 (57, 3, NULL, 6,    'expense',   78.00, '2026-05-08', '2026-05-08', 'Dinner out'),
-(58, 1, NULL, 1,    'income',  4000.00, '2026-05-15', '2026-05-15', 'Monthly salary – May');
+(58, 1, NULL, 1,    'income',  4000.00, '2026-05-15', '2026-05-15', 'Monthly salary - May');
 
 
 -- =============================================================================
