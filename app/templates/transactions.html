@@ -7,51 +7,123 @@
     <span class="text-muted">{{ user_name }}</span>
 </div>
 
-<!-- Account selector -->
-<form method="get" class="mb-4 d-flex align-items-center gap-2">
+<!-- Filters -->
+<form method="get" id="filter-form" class="mb-4">
     <input type="hidden" name="user_id" value="{{ uid }}">
-    <label class="fw-semibold">Account:</label>
-    <select name="account_id" class="form-select" style="width:auto" onchange="this.form.submit()">
-        {% for acc in accounts %}
-        <option value="{{ acc.account_id }}"
-                {% if acc.account_id == account_id %}selected{% endif %}>
-            {{ acc.name }}
-        </option>
-        {% endfor %}
-    </select>
+    <div class="d-flex flex-wrap align-items-end gap-3">
+        <div>
+            <label class="form-label fw-semibold mb-1">Account</label>
+            <select name="account_id" class="form-select" style="width:auto" onchange="this.form.submit()">
+                {% for acc in accounts %}
+                <option value="{{ acc.account_id }}" {% if acc.account_id == account_id %}selected{% endif %}>
+                    {{ acc.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label fw-semibold mb-1">From</label>
+            <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+        </div>
+        <div>
+            <label class="form-label fw-semibold mb-1">To</label>
+            <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+        </div>
+        <div>
+            <label class="form-label fw-semibold mb-1">Category</label>
+            <select name="category_id" class="form-select" style="width:auto">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.category_id }}" {% if cat.category_id|string == category_id %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label fw-semibold mb-1">Tag</label>
+            <select name="tag_id" class="form-select" style="width:auto">
+                <option value="">All Tags</option>
+                {% for tag in tags %}
+                <option value="{{ tag.tag_id }}" {% if tag.tag_id|string == tag_id %}selected{% endif %}>
+                    {{ tag.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Apply</button>
+            <a href="/transactions?user_id={{ uid }}&account_id={{ account_id }}" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </div>
+    <div class="mt-2 d-flex gap-2 align-items-center">
+        <span class="text-muted small">Quick:</span>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="applyPreset('filter-form','month')">This Month</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="applyPreset('filter-form','last30')">Last 30 Days</button>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="applyPreset('filter-form','ytd')">Year to Date</button>
+    </div>
 </form>
 
 {% if transactions %}
+<div class="table-responsive">
 <table class="table table-hover shadow-sm">
     <thead>
         <tr>
             <th>Date</th>
             <th>Type</th>
             <th>Description</th>
+            <th>Category</th>
+            <th>Tags</th>
             <th class="text-end">Amount</th>
-            <th class="text-end">Balance After</th>
+            {% if show_balance %}<th class="text-end">Balance After</th>{% endif %}
         </tr>
     </thead>
     <tbody>
         {% for t in transactions %}
         <tr>
-            <td>{{ t.transaction_date }}</td>
+            <td class="text-nowrap">{{ t.transaction_date }}</td>
             <td>
-                <span class="badge badge-{{ t.type }}">{{ t.type.title() }}</span>
+                {% if t.type == 'transfer' and t.incoming %}
+                    <span class="badge badge-transfer-in">Transfer In</span>
+                {% elif t.type == 'transfer' %}
+                    <span class="badge badge-transfer-out">Transfer Out</span>
+                {% else %}
+                    <span class="badge badge-{{ t.type }}">{{ t.type.title() }}</span>
+                {% endif %}
             </td>
-            <td class="text-muted">{{ t.description or '—' }}</td>
-            <td class="text-end {% if t.type == 'income' %}positive{% elif t.type == 'expense' %}negative{% endif %}">
-                {% if t.type == 'expense' %}−{% elif t.type == 'income' %}+{% endif %}
+            <td class="text-muted">
+                {% if t.transfer_label %}
+                    {{ t.transfer_label }}
+                    {% if t.description %}
+                    <br><small class="fst-italic">{{ t.description }}</small>
+                    {% endif %}
+                {% else %}
+                    {{ t.description or '—' }}
+                {% endif %}
+            </td>
+            <td class="text-muted small">{{ t.category or '—' }}</td>
+            <td>
+                {% if t.tag_names %}
+                    {% for tag in t.tag_names.split(', ') %}
+                    <span class="badge bg-secondary me-1">{{ tag }}</span>
+                    {% endfor %}
+                {% else %}—{% endif %}
+            </td>
+            <td class="text-end text-nowrap {% if t.type == 'income' or (t.type == 'transfer' and t.incoming) %}positive{% else %}negative{% endif %}">
+                {% if t.type == 'income' or (t.type == 'transfer' and t.incoming) %}+{% else %}−{% endif %}
                 ${{ "%.2f" | format(t.amount) }}
             </td>
-            <td class="text-end {% if t.running_balance >= 0 %}positive{% else %}negative{% endif %}">
+            {% if show_balance %}
+            <td class="text-end text-nowrap {% if t.running_balance >= 0 %}positive{% else %}negative{% endif %}">
                 ${{ "%.2f" | format(t.running_balance) }}
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
-<div class="alert alert-info">No transactions recorded for this account yet.</div>
+<div class="alert alert-info">No transactions found for the selected filters.</div>
 {% endif %}
 {% endblock %}

@@ -9,6 +9,7 @@
 
 <!-- Negative balance accounts -->
 <h5>&#9888; Accounts in Negative Balance</h5>
+<p class="text-muted small">Credit card balances in orange represent money owed — expected and not an error.</p>
 {% if negative %}
 <table class="table table-hover shadow-sm mb-5">
     <thead>
@@ -16,14 +17,23 @@
             <th>Account</th>
             <th>Type</th>
             <th class="text-end">Current Balance</th>
+            <th>Status</th>
         </tr>
     </thead>
     <tbody>
         {% for row in negative %}
-        <tr class="table-danger">
+        {% set is_credit = row.type == 'credit_card' %}
+        <tr class="{{ 'table-warning' if is_credit else 'table-danger' }}">
             <td class="fw-semibold">{{ row.account_name }}</td>
             <td><span class="badge bg-secondary">{{ row.type.replace('_',' ').title() }}</span></td>
-            <td class="text-end negative">${{ "%.2f" | format(row.current_balance) }}</td>
+            <td class="text-end {{ 'credit-balance' if is_credit else 'negative' }}">${{ "%.2f" | format(row.current_balance) }}</td>
+            <td>
+                {% if is_credit %}
+                <span class="badge bg-warning text-dark">&#9888; Amount Owed</span>
+                {% else %}
+                <span class="badge bg-danger">&#10005; Overdrawn</span>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>

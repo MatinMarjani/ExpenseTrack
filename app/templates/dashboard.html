@@ -33,15 +33,75 @@
     </thead>
     <tbody>
         {% for acc in accounts %}
-        <tr>
+        {% set is_credit = acc.type == 'credit_card' %}
+        <tr {% if acc.current_balance < 0 %}class="{{ 'table-warning' if is_credit else 'table-danger' }}"{% endif %}>
             <td class="fw-semibold">{{ acc.name }}</td>
             <td><span class="badge bg-secondary">{{ acc.type.replace('_', ' ').title() }}</span></td>
             <td class="text-end">${{ "%.2f" | format(acc.initial_balance) }}</td>
-            <td class="text-end {% if acc.current_balance >= 0 %}positive{% else %}negative{% endif %}">
+            <td class="text-end
+                {%- if acc.current_balance >= 0 %} positive
+                {%- elif is_credit %} credit-balance
+                {%- else %} negative
+                {%- endif %}">
                 ${{ "%.2f" | format(acc.current_balance) }}
+                {% if is_credit and acc.current_balance < 0 %}
+                <span class="badge bg-warning text-dark ms-1" title="Credit card balance — amount owed">&#9888;</span>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<!-- Net worth trend -->
+{% if trend_labels %}
+<h5 class="mt-4">Net Worth Trend</h5>
+<div class="shadow-sm rounded bg-white p-3">
+    <canvas id="trendChart" style="max-height:260px;"></canvas>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if trend_labels %}
+<script>
+(function () {
+    const labels = {{ trend_labels | tojson }};
+    const data   = {{ trend_data   | tojson }};
+    const color  = data[data.length - 1] >= 0 ? '#198754' : '#dc3545';
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Net Worth',
+                data: data,
+                borderColor: color,
+                backgroundColor: color + '22',
+                borderWidth: 2,
+                pointRadius: 4,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => '  $' + ctx.parsed.y.toFixed(2)
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: { callback: v => '$' + v.toLocaleString() }
+                }
+            }
+        }
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}
