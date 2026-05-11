@@ -5,7 +5,7 @@
 --
 -- Dataset summary:
 --   3 users  |  9 accounts  |  22 categories  |  14 tags
---   58 transactions  |  8 receipts  |  25 transaction-tag links
+--   193 transactions  |  8 receipts  |  68 transaction-tag links
 --
 -- Transaction date range: January 2025 -May 2026
 --
@@ -267,6 +267,259 @@ INSERT INTO TransactionTags (transaction_id, tag_id) VALUES
 (44, 12),   -- groceries Jan → personal
 (48, 11),   -- tuition Feb   → school
 (52, 14);   -- entertainment → fun
+
+
+-- =============================================================================
+-- ADDITIONAL TRANSACTIONS  (May – December 2025)
+-- Extends all three users' histories for a richer dataset.
+-- =============================================================================
+
+INSERT INTO Transactions
+    (transaction_id, account_id, counterparty_account_id, category_id,
+     type, amount, transaction_date, entry_date, description)
+OVERRIDING SYSTEM VALUE VALUES
+
+-- ── Alice – May 2025 ──────────────────────────────────────────────────────────
+( 59, 1, NULL, 1,    'income',  4000.00, '2025-05-15', '2025-05-15', 'Monthly salary - May'),
+( 60, 1, NULL, 4,    'expense', 1200.00, '2025-05-01', '2025-05-01', 'May rent payment'),
+( 61, 1, NULL, 3,    'expense',  285.00, '2025-05-09', '2025-05-09', 'Grocery run - Trader Joe''s'),
+( 62, 1, NULL, 8,    'expense',   92.00, '2025-05-20', '2025-05-20', 'Electric and gas bill'),
+( 63, 1, NULL, 5,    'expense',   45.00, '2025-05-28', '2025-05-28', 'Monthly transit pass'),
+( 64, 3, NULL, 6,    'expense',   68.00, '2025-05-17', '2025-05-17', 'Dinner out'),
+
+-- ── Alice – June 2025 ─────────────────────────────────────────────────────────
+( 65, 1, NULL, 1,    'income',  4000.00, '2025-06-15', '2025-06-15', 'Monthly salary - June'),
+( 66, 1, NULL, 4,    'expense', 1200.00, '2025-06-01', '2025-06-01', 'June rent payment'),
+( 67, 1, NULL, 2,    'income',  1800.00, '2025-06-10', '2025-06-10', 'Mobile app redesign contract'),
+( 68, 1, NULL, 3,    'expense',  305.00, '2025-06-07', '2025-06-07', 'Grocery run - Whole Foods'),
+( 69, 1, NULL, 8,    'expense',   98.00, '2025-06-20', '2025-06-20', 'Electric and gas bill'),
+( 70, 1, NULL, 5,    'expense',   50.00, '2025-06-25', '2025-06-25', 'Monthly transit pass'),
+
+-- ── Alice – July 2025 ─────────────────────────────────────────────────────────
+( 71, 1, NULL, 1,    'income',  4000.00, '2025-07-15', '2025-07-15', 'Monthly salary - July'),
+( 72, 1, NULL, 4,    'expense', 1200.00, '2025-07-01', '2025-07-01', 'July rent payment'),
+( 73, 1, NULL, 3,    'expense',  270.00, '2025-07-10', '2025-07-10', 'Grocery run - Costco'),
+( 74, 1, NULL, 8,    'expense',  145.00, '2025-07-22', '2025-07-22', 'Electric and gas bill'),
+( 75, 3, NULL, 6,    'expense',  125.00, '2025-07-18', '2025-07-18', 'Birthday dinner'),
+( 76, 1, NULL, 5,    'expense',   45.00, '2025-07-28', '2025-07-28', 'Monthly transit pass'),
+
+-- ── Alice – August 2025 ───────────────────────────────────────────────────────
+( 77, 1, NULL, 1,    'income',  4000.00, '2025-08-15', '2025-08-15', 'Monthly salary - August'),
+( 78, 1, NULL, 4,    'expense', 1200.00, '2025-08-01', '2025-08-01', 'August rent payment'),
+( 79, 1, NULL, 3,    'expense',  295.00, '2025-08-08', '2025-08-08', 'Grocery run - Trader Joe''s'),
+( 80, 1, NULL, 8,    'expense',  130.00, '2025-08-20', '2025-08-20', 'Electric and gas bill'),
+( 81, 1, NULL, 5,    'expense',   50.00, '2025-08-26', '2025-08-26', 'Monthly transit pass'),
+( 82, 1, 2,    NULL, 'transfer', 800.00, '2025-08-30', '2025-08-30', 'Savings top-up'),
+
+-- ── Alice – September 2025 ────────────────────────────────────────────────────
+( 83, 1, NULL, 1,    'income',  4000.00, '2025-09-15', '2025-09-15', 'Monthly salary - September'),
+( 84, 1, NULL, 4,    'expense', 1200.00, '2025-09-01', '2025-09-01', 'September rent payment'),
+( 85, 1, NULL, 2,    'income',  2200.00, '2025-09-05', '2025-09-05', 'Dashboard redesign project'),
+( 86, 1, NULL, 3,    'expense',  280.00, '2025-09-11', '2025-09-11', 'Grocery run - Whole Foods'),
+( 87, 1, NULL, 8,    'expense',  105.00, '2025-09-22', '2025-09-22', 'Electric and gas bill'),
+( 88, 3, NULL, 6,    'expense',   95.00, '2025-09-14', '2025-09-14', 'Team lunch'),
+( 89, 1, NULL, 5,    'expense',   45.00, '2025-09-25', '2025-09-25', 'Monthly transit pass'),
+
+-- ── Alice – October 2025 ──────────────────────────────────────────────────────
+( 90, 1, NULL, 1,    'income',  4000.00, '2025-10-15', '2025-10-15', 'Monthly salary - October'),
+( 91, 1, NULL, 4,    'expense', 1200.00, '2025-10-01', '2025-10-01', 'October rent payment'),
+( 92, 1, NULL, 3,    'expense',  320.00, '2025-10-09', '2025-10-09', 'Grocery run - Costco'),
+( 93, 1, NULL, 8,    'expense',  120.00, '2025-10-22', '2025-10-22', 'Electric and gas bill'),
+( 94, 1, NULL, 5,    'expense',   45.00, '2025-10-28', '2025-10-28', 'Monthly transit pass'),
+( 95, 1, 2,    NULL, 'transfer', 600.00, '2025-10-30', '2025-10-30', 'Savings transfer'),
+
+-- ── Alice – November 2025 ─────────────────────────────────────────────────────
+( 96, 1, NULL, 1,    'income',  4000.00, '2025-11-15', '2025-11-15', 'Monthly salary - November'),
+( 97, 1, NULL, 4,    'expense', 1200.00, '2025-11-01', '2025-11-01', 'November rent payment'),
+( 98, 1, NULL, 3,    'expense',  340.00, '2025-11-20', '2025-11-20', 'Thanksgiving groceries'),
+( 99, 1, NULL, 8,    'expense',  130.00, '2025-11-22', '2025-11-22', 'Electric and gas bill'),
+(100, 3, NULL, 6,    'expense',   85.00, '2025-11-28', '2025-11-28', 'Thanksgiving dinner out'),
+(101, 1, NULL, 5,    'expense',   50.00, '2025-11-25', '2025-11-25', 'Monthly transit pass'),
+
+-- ── Alice – December 2025 ─────────────────────────────────────────────────────
+(102, 1, NULL, 1,    'income',  4000.00, '2025-12-15', '2025-12-15', 'Monthly salary - December'),
+(103, 1, NULL, 2,    'income',  2000.00, '2025-12-20', '2025-12-20', 'Year-end bonus project'),
+(104, 1, NULL, 4,    'expense', 1200.00, '2025-12-01', '2025-12-01', 'December rent payment'),
+(105, 1, NULL, 3,    'expense',  380.00, '2025-12-18', '2025-12-18', 'Holiday groceries'),
+(106, 1, NULL, 8,    'expense',  160.00, '2025-12-22', '2025-12-22', 'Electric and gas bill'),
+(107, 3, NULL, 6,    'expense',  150.00, '2025-12-24', '2025-12-24', 'Christmas Eve dinner'),
+(108, 1, NULL, 5,    'expense',   45.00, '2025-12-26', '2025-12-26', 'Monthly transit pass'),
+
+-- ── Bob – April 2025 ──────────────────────────────────────────────────────────
+(109, 4, NULL, 9,    'income',  6500.00, '2025-04-15', '2025-04-15', 'Monthly salary - April'),
+(110, 4, NULL, 12,   'expense', 1800.00, '2025-04-01', '2025-04-01', 'Mortgage payment - April'),
+(111, 4, NULL, 11,   'expense',  390.00, '2025-04-08', '2025-04-08', 'Groceries - April'),
+(112, 7, NULL, 15,   'expense',   45.00, '2025-04-05', '2025-04-05', 'Netflix + Spotify subscriptions'),
+(113, 4, NULL, 13,   'expense',  180.00, '2025-04-10', '2025-04-10', 'Car insurance premium'),
+(114, 4, 5,    NULL, 'transfer',1000.00, '2025-04-28', '2025-04-28', 'Monthly savings transfer'),
+
+-- ── Bob – May 2025 ────────────────────────────────────────────────────────────
+(115, 4, NULL, 9,    'income',  6500.00, '2025-05-15', '2025-05-15', 'Monthly salary - May'),
+(116, 4, NULL, 12,   'expense', 1800.00, '2025-05-01', '2025-05-01', 'Mortgage payment - May'),
+(117, 4, NULL, 11,   'expense',  410.00, '2025-05-09', '2025-05-09', 'Groceries - May'),
+(118, 7, NULL, 15,   'expense',   45.00, '2025-05-05', '2025-05-05', 'Netflix + Spotify subscriptions'),
+(119, 4, NULL, 16,   'expense', 1200.00, '2025-05-23', '2025-05-23', 'Memorial Day weekend trip'),
+
+-- ── Bob – June 2025 ───────────────────────────────────────────────────────────
+(120, 4, NULL, 9,    'income',  6500.00, '2025-06-15', '2025-06-15', 'Monthly salary - June'),
+(121, 4, NULL, 12,   'expense', 1800.00, '2025-06-01', '2025-06-01', 'Mortgage payment - June'),
+(122, 5, NULL, 10,   'income',   400.00, '2025-06-30', '2025-06-30', 'Quarterly dividend payment'),
+(123, 4, NULL, 11,   'expense',  360.00, '2025-06-07', '2025-06-07', 'Groceries - June'),
+(124, 7, NULL, 15,   'expense',   45.00, '2025-06-05', '2025-06-05', 'Netflix + Spotify subscriptions'),
+(125, 4, 5,    NULL, 'transfer',1500.00, '2025-06-28', '2025-06-28', 'Savings boost'),
+
+-- ── Bob – July 2025 ───────────────────────────────────────────────────────────
+(126, 4, NULL, 9,    'income',  6500.00, '2025-07-15', '2025-07-15', 'Monthly salary - July'),
+(127, 4, NULL, 12,   'expense', 1800.00, '2025-07-01', '2025-07-01', 'Mortgage payment - July'),
+(128, 4, NULL, 11,   'expense',  430.00, '2025-07-10', '2025-07-10', 'Groceries - July'),
+(129, 7, NULL, 15,   'expense',   45.00, '2025-07-05', '2025-07-05', 'Netflix + Spotify subscriptions'),
+(130, 4, NULL, 16,   'expense', 2400.00, '2025-07-12', '2025-07-12', 'Summer vacation flights and hotel'),
+(131, 7, NULL, 16,   'expense',  350.00, '2025-07-15', '2025-07-15', 'Vacation dining and activities'),
+
+-- ── Bob – August 2025 ─────────────────────────────────────────────────────────
+(132, 4, NULL, 9,    'income',  6500.00, '2025-08-15', '2025-08-15', 'Monthly salary - August'),
+(133, 4, NULL, 12,   'expense', 1800.00, '2025-08-01', '2025-08-01', 'Mortgage payment - August'),
+(134, 4, NULL, 11,   'expense',  405.00, '2025-08-08', '2025-08-08', 'Groceries - August'),
+(135, 7, NULL, 15,   'expense',   45.00, '2025-08-05', '2025-08-05', 'Netflix + Spotify subscriptions'),
+(136, 7, NULL, 14,   'expense',  350.00, '2025-08-20', '2025-08-20', 'Annual physical and lab work'),
+(137, 4, 5,    NULL, 'transfer',1000.00, '2025-08-28', '2025-08-28', 'Monthly savings transfer'),
+
+-- ── Bob – September 2025 ──────────────────────────────────────────────────────
+(138, 4, NULL, 9,    'income',  6500.00, '2025-09-15', '2025-09-15', 'Monthly salary - September'),
+(139, 4, NULL, 12,   'expense', 1800.00, '2025-09-01', '2025-09-01', 'Mortgage payment - September'),
+(140, 4, NULL, 11,   'expense',  445.00, '2025-09-11', '2025-09-11', 'Groceries - September'),
+(141, 7, NULL, 15,   'expense',   45.00, '2025-09-05', '2025-09-05', 'Netflix + Spotify subscriptions'),
+(142, 4, NULL, 13,   'expense',  180.00, '2025-09-10', '2025-09-10', 'Car insurance premium'),
+
+-- ── Bob – October 2025 ────────────────────────────────────────────────────────
+(143, 4, NULL, 9,    'income',  6500.00, '2025-10-15', '2025-10-15', 'Monthly salary - October'),
+(144, 4, NULL, 12,   'expense', 1800.00, '2025-10-01', '2025-10-01', 'Mortgage payment - October'),
+(145, 4, NULL, 11,   'expense',  460.00, '2025-10-09', '2025-10-09', 'Groceries - October'),
+(146, 7, NULL, 15,   'expense',   45.00, '2025-10-05', '2025-10-05', 'Netflix + Spotify subscriptions'),
+(147, 5, NULL, 10,   'income',   400.00, '2025-10-31', '2025-10-31', 'Quarterly dividend payment'),
+(148, 4, 5,    NULL, 'transfer',1000.00, '2025-10-28', '2025-10-28', 'Monthly savings transfer'),
+
+-- ── Bob – November 2025 ───────────────────────────────────────────────────────
+(149, 4, NULL, 9,    'income',  6500.00, '2025-11-15', '2025-11-15', 'Monthly salary - November'),
+(150, 4, NULL, 12,   'expense', 1800.00, '2025-11-01', '2025-11-01', 'Mortgage payment - November'),
+(151, 4, NULL, 11,   'expense',  480.00, '2025-11-20', '2025-11-20', 'Thanksgiving groceries'),
+(152, 7, NULL, 15,   'expense',   45.00, '2025-11-05', '2025-11-05', 'Netflix + Spotify subscriptions'),
+(153, 7, NULL, 14,   'expense',  200.00, '2025-11-10', '2025-11-10', 'Flu shot and prescription'),
+
+-- ── Bob – December 2025 ───────────────────────────────────────────────────────
+(154, 4, NULL, 9,    'income',  6500.00, '2025-12-15', '2025-12-15', 'Monthly salary - December'),
+(155, 4, NULL, 12,   'expense', 1800.00, '2025-12-01', '2025-12-01', 'Mortgage payment - December'),
+(156, 4, NULL, 11,   'expense',  520.00, '2025-12-18', '2025-12-18', 'Holiday groceries'),
+(157, 7, NULL, 15,   'expense',   45.00, '2025-12-05', '2025-12-05', 'Netflix + Spotify subscriptions'),
+(158, 4, NULL, 16,   'expense',  800.00, '2025-12-26', '2025-12-26', 'Holiday travel'),
+(159, 4, 5,    NULL, 'transfer',2000.00, '2025-12-28', '2025-12-28', 'Year-end savings push'),
+
+-- ── Carol – April 2025 ────────────────────────────────────────────────────────
+(160, 8, NULL, 17,   'income',   800.00, '2025-04-30', '2025-04-30', 'Part-time job paycheck'),
+(161, 8, NULL, 20,   'expense',  190.00, '2025-04-14', '2025-04-14', 'Groceries - April'),
+(162, 8, NULL, 21,   'expense',   60.00, '2025-04-20', '2025-04-20', 'Bus pass - April'),
+(163, 8, NULL, 22,   'expense',   35.00, '2025-04-25', '2025-04-25', 'Movie night'),
+
+-- ── Carol – May 2025 ──────────────────────────────────────────────────────────
+(164, 8, NULL, 17,   'income',   850.00, '2025-05-31', '2025-05-31', 'Part-time job paycheck'),
+(165, 8, NULL, 20,   'expense',  210.00, '2025-05-15', '2025-05-15', 'Groceries - May'),
+(166, 8, NULL, 21,   'expense',   60.00, '2025-05-20', '2025-05-20', 'Bus pass - May'),
+
+-- ── Carol – June 2025 ─────────────────────────────────────────────────────────
+(167, 8, NULL, 17,   'income',   800.00, '2025-06-30', '2025-06-30', 'Part-time job paycheck'),
+(168, 8, NULL, 18,   'income',  2000.00, '2025-06-01', '2025-06-01', 'Summer scholarship award'),
+(169, 8, NULL, 20,   'expense',  185.00, '2025-06-10', '2025-06-10', 'Groceries - June'),
+(170, 8, NULL, 22,   'expense',   55.00, '2025-06-20', '2025-06-20', 'Concert tickets'),
+
+-- ── Carol – July 2025 ─────────────────────────────────────────────────────────
+(171, 8, NULL, 17,   'income',   900.00, '2025-07-31', '2025-07-31', 'Part-time job paycheck'),
+(172, 8, NULL, 20,   'expense',  200.00, '2025-07-12', '2025-07-12', 'Groceries - July'),
+(173, 8, NULL, 21,   'expense',   60.00, '2025-07-20', '2025-07-20', 'Bus pass - July'),
+(174, 8, NULL, 22,   'expense',   80.00, '2025-07-28', '2025-07-28', 'Day trip and food'),
+
+-- ── Carol – August 2025 ───────────────────────────────────────────────────────
+(175, 8, NULL, 17,   'income',   850.00, '2025-08-31', '2025-08-31', 'Part-time job paycheck'),
+(176, 8, NULL, 20,   'expense',  195.00, '2025-08-08', '2025-08-08', 'Groceries - August'),
+(177, 8, NULL, 21,   'expense',   60.00, '2025-08-18', '2025-08-18', 'Bus pass - August'),
+
+-- ── Carol – September 2025 ────────────────────────────────────────────────────
+(178, 8, NULL, 17,   'income',   800.00, '2025-09-30', '2025-09-30', 'Part-time job paycheck'),
+(179, 8, NULL, 18,   'income',  1500.00, '2025-09-01', '2025-09-01', 'Fall semester scholarship'),
+(180, 8, NULL, 19,   'expense', 1200.00, '2025-09-05', '2025-09-05', 'Fall semester tuition payment'),
+(181, 8, NULL, 20,   'expense',  175.00, '2025-09-15', '2025-09-15', 'Groceries - September'),
+(182, 8, NULL, 21,   'expense',   60.00, '2025-09-20', '2025-09-20', 'Bus pass - September'),
+
+-- ── Carol – October 2025 ──────────────────────────────────────────────────────
+(183, 8, NULL, 17,   'income',   800.00, '2025-10-31', '2025-10-31', 'Part-time job paycheck'),
+(184, 8, NULL, 20,   'expense',  185.00, '2025-10-12', '2025-10-12', 'Groceries - October'),
+(185, 8, NULL, 21,   'expense',   60.00, '2025-10-20', '2025-10-20', 'Bus pass - October'),
+(186, 8, NULL, 22,   'expense',   40.00, '2025-10-31', '2025-10-31', 'Halloween party supplies'),
+
+-- ── Carol – November 2025 ─────────────────────────────────────────────────────
+(187, 8, NULL, 17,   'income',   850.00, '2025-11-30', '2025-11-30', 'Part-time job paycheck'),
+(188, 8, NULL, 20,   'expense',  225.00, '2025-11-20', '2025-11-20', 'Thanksgiving groceries'),
+(189, 8, NULL, 21,   'expense',   60.00, '2025-11-18', '2025-11-18', 'Bus pass - November'),
+
+-- ── Carol – December 2025 ─────────────────────────────────────────────────────
+(190, 8, NULL, 17,   'income',   800.00, '2025-12-31', '2025-12-31', 'Part-time job paycheck'),
+(191, 8, NULL, 20,   'expense',  240.00, '2025-12-18', '2025-12-18', 'Holiday groceries'),
+(192, 8, NULL, 21,   'expense',   60.00, '2025-12-20', '2025-12-20', 'Bus pass - December'),
+(193, 8, NULL, 22,   'expense',   65.00, '2025-12-25', '2025-12-25', 'Holiday celebration');
+
+
+-- =============================================================================
+-- ADDITIONAL TRANSACTION TAGS
+-- =============================================================================
+
+INSERT INTO TransactionTags (transaction_id, tag_id) VALUES
+-- Alice (new transactions)
+( 59,  1),   -- salary May       → work
+( 59,  3),   -- salary May       → recurring
+( 60,  3),   -- rent May         → recurring
+( 62,  3),   -- utilities May    → recurring
+( 63,  3),   -- transit May      → recurring
+( 65,  1),   -- salary Jun       → work
+( 65,  3),   -- salary Jun       → recurring
+( 66,  3),   -- rent Jun         → recurring
+( 67,  1),   -- freelance Jun    → work
+( 67,  4),   -- freelance Jun    → tax-deductible
+( 75,  2),   -- birthday dinner  → personal
+( 83,  1),   -- salary Sep       → work
+( 83,  3),   -- salary Sep       → recurring
+( 85,  1),   -- freelance Sep    → work
+( 85,  4),   -- freelance Sep    → tax-deductible
+( 96,  1),   -- salary Nov       → work
+( 96,  3),   -- salary Nov       → recurring
+(101,  3),   -- transit Nov      → recurring
+(102,  1),   -- salary Dec       → work
+(102,  3),   -- salary Dec       → recurring
+(103,  1),   -- year-end project → work
+(103,  4),   -- year-end project → tax-deductible
+-- Bob (new transactions)
+(109,  6),   -- salary Apr       → business
+(110,  9),   -- mortgage Apr     → home
+(112,  6),   -- subscriptions    → business
+(119, 10),   -- Memorial Day     → travel
+(119,  7),   -- Memorial Day     → personal
+(126,  6),   -- salary Jul       → business
+(130, 10),   -- summer vacation  → travel
+(130,  7),   -- summer vacation  → personal
+(131, 10),   -- vacation dining  → travel
+(136,  8),   -- physical exam    → medical
+(153,  8),   -- flu shot         → medical
+(158, 10),   -- holiday travel   → travel
+(158,  7),   -- holiday travel   → personal
+-- Carol (new transactions)
+(160, 11),   -- paycheck Apr     → school
+(161, 13),   -- groceries Apr    → food
+(163, 14),   -- movie night      → fun
+(168, 11),   -- scholarship Jun  → school
+(170, 14),   -- concert          → fun
+(174, 14),   -- day trip         → fun
+(178, 11),   -- paycheck Sep     → school
+(179, 11),   -- scholarship Sep  → school
+(180, 11),   -- tuition Sep      → school
+(186, 14);   -- Halloween        → fun
 
 
 -- =============================================================================
