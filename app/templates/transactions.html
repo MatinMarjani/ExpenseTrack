@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Transactions{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Transaction Ledger</h2>
+    <span class="text-muted">{{ user_name }}</span>
+</div>
+
+<!-- Account selector -->
+<form method="get" class="mb-4 d-flex align-items-center gap-2">
+    <input type="hidden" name="user_id" value="{{ uid }}">
+    <label class="fw-semibold">Account:</label>
+    <select name="account_id" class="form-select" style="width:auto" onchange="this.form.submit()">
+        {% for acc in accounts %}
+        <option value="{{ acc.account_id }}"
+                {% if acc.account_id == account_id %}selected{% endif %}>
+            {{ acc.name }}
+        </option>
+        {% endfor %}
+    </select>
+</form>
+
+{% if transactions %}
+<table class="table table-hover shadow-sm">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th class="text-end">Amount</th>
+            <th class="text-end">Balance After</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in transactions %}
+        <tr>
+            <td>{{ t.transaction_date }}</td>
+            <td>
+                <span class="badge badge-{{ t.type }}">{{ t.type.title() }}</span>
+            </td>
+            <td class="text-muted">{{ t.description or '—' }}</td>
+            <td class="text-end {% if t.type == 'income' %}positive{% elif t.type == 'expense' %}negative{% endif %}">
+                {% if t.type == 'expense' %}−{% elif t.type == 'income' %}+{% endif %}
+                ${{ "%.2f" | format(t.amount) }}
+            </td>
+            <td class="text-end {% if t.running_balance >= 0 %}positive{% else %}negative{% endif %}">
+                ${{ "%.2f" | format(t.running_balance) }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">No transactions recorded for this account yet.</div>
+{% endif %}
+{% endblock %}

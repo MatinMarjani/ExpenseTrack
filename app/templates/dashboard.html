@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Dashboard</h2>
+    <span class="text-muted">{{ user_name }}</span>
+</div>
+
+<!-- Net worth card -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card card-stat text-white {% if net_worth >= 0 %}bg-success{% else %}bg-danger{% endif %} shadow-sm">
+            <div class="card-body">
+                <div class="small text-white-50 text-uppercase fw-bold">Total Net Worth</div>
+                <div class="fs-2 fw-bold">${{ "%.2f" | format(net_worth) }}</div>
+                <div class="small text-white-50">across all accounts</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Account balances table -->
+<h5>Account Balances</h5>
+<table class="table table-striped table-hover shadow-sm rounded">
+    <thead>
+        <tr>
+            <th>Account</th>
+            <th>Type</th>
+            <th class="text-end">Initial Balance</th>
+            <th class="text-end">Current Balance</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for acc in accounts %}
+        <tr>
+            <td class="fw-semibold">{{ acc.name }}</td>
+            <td><span class="badge bg-secondary">{{ acc.type.replace('_', ' ').title() }}</span></td>
+            <td class="text-end">${{ "%.2f" | format(acc.initial_balance) }}</td>
+            <td class="text-end {% if acc.current_balance >= 0 %}positive{% else %}negative{% endif %}">
+                ${{ "%.2f" | format(acc.current_balance) }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

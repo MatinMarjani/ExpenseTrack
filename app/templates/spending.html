@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Spending{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Spending Analysis</h2>
+    <span class="text-muted">{{ user_name }}</span>
+</div>
+
+<!-- This month -->
+<h5>Top Categories This Month</h5>
+{% if top_month %}
+<table class="table table-striped table-hover shadow-sm mb-5">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th class="text-end">Amount Spent</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in top_month %}
+        <tr>
+            <td>{{ row.category }}</td>
+            <td class="text-end negative">${{ "%.2f" | format(row.total_spent) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info mb-5">No expense transactions recorded this month.</div>
+{% endif %}
+
+<!-- All-time breakdown -->
+<h5>All-Time Spending Breakdown</h5>
+{% if breakdown %}
+<table class="table table-striped table-hover shadow-sm">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th class="text-end">Total Spent</th>
+            <th class="text-end">Share</th>
+            <th>Distribution</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in breakdown %}
+        <tr>
+            <td>{{ row.category }}</td>
+            <td class="text-end negative">${{ "%.2f" | format(row.category_total) }}</td>
+            <td class="text-end">{{ row.percentage }}%</td>
+            <td style="width:30%">
+                <div class="progress" style="height:10px">
+                    <div class="progress-bar bg-danger" style="width:{{ row.percentage }}%"></div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">No expense data found.</div>
+{% endif %}
+{% endblock %}

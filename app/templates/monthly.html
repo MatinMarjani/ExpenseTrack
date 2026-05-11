@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Monthly Report{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Monthly Report</h2>
+    <span class="text-muted">{{ user_name }}</span>
+</div>
+
+<p class="text-muted">Rows highlighted in green are months where income exceeded expenses.</p>
+
+{% if monthly_data %}
+<table class="table table-hover shadow-sm">
+    <thead>
+        <tr>
+            <th>Year</th>
+            <th>Month</th>
+            <th class="text-end">Total Income</th>
+            <th class="text-end">Total Expenses</th>
+            <th class="text-end">Net</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in monthly_data %}
+        {% set net = row.total_income - row.total_expenses %}
+        <tr {% if net > 0 %}class="table-success"{% elif net < 0 %}class="table-danger"{% endif %}>
+            <td>{{ row.year }}</td>
+            <td>{{ [
+                '', 'January','February','March','April','May','June',
+                'July','August','September','October','November','December'
+                ][row.month] }}</td>
+            <td class="text-end positive">${{ "%.2f" | format(row.total_income) }}</td>
+            <td class="text-end negative">${{ "%.2f" | format(row.total_expenses) }}</td>
+            <td class="text-end {% if net >= 0 %}positive{% else %}negative{% endif %}">
+                {% if net >= 0 %}+{% endif %}${{ "%.2f" | format(net) }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">No transaction history found.</div>
+{% endif %}
+{% endblock %}

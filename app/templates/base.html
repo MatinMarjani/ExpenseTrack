@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseTrack – {% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .navbar-brand { font-weight: 700; letter-spacing: 0.5px; }
+        .positive { color: #198754; font-weight: 600; }
+        .negative { color: #dc3545; font-weight: 600; }
+        .table th { background-color: #212529; color: #fff; }
+        .card-stat { border: none; border-radius: 12px; }
+        .badge-income   { background-color: #198754 !important; }
+        .badge-expense  { background-color: #dc3545 !important; }
+        .badge-transfer { background-color: #0d6efd !important; }
+        .page-header { border-bottom: 2px solid #dee2e6; padding-bottom: .5rem; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-2">
+    <div class="container">
+        <a class="navbar-brand" href="/?user_id={{ uid }}">&#128200; ExpenseTrack</a>
+
+        <div class="navbar-nav me-auto">
+            <a class="nav-link {% if request.endpoint == 'dashboard'    %}active fw-bold{% endif %}"
+               href="/?user_id={{ uid }}">Dashboard</a>
+            <a class="nav-link {% if request.endpoint == 'transactions' %}active fw-bold{% endif %}"
+               href="/transactions?user_id={{ uid }}">Transactions</a>
+            <a class="nav-link {% if request.endpoint == 'spending'     %}active fw-bold{% endif %}"
+               href="/spending?user_id={{ uid }}">Spending</a>
+            <a class="nav-link {% if request.endpoint == 'monthly'      %}active fw-bold{% endif %}"
+               href="/monthly?user_id={{ uid }}">Monthly</a>
+            <a class="nav-link {% if request.endpoint == 'insights'     %}active fw-bold{% endif %}"
+               href="/insights?user_id={{ uid }}">Insights</a>
+        </div>
+
+        <!-- User switcher -->
+        <form class="d-flex align-items-center gap-2" method="get" action="{{ request.path }}">
+            <label class="text-white-50 small mb-0">Viewing as:</label>
+            <select name="user_id" class="form-select form-select-sm" style="width:auto"
+                    onchange="this.form.submit()">
+                {% for u in users %}
+                <option value="{{ u.user_id }}" {% if u.user_id == uid %}selected{% endif %}>
+                    {{ u.full_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</nav>
+
+<div class="container pb-5">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
