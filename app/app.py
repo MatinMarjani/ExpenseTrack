@@ -115,6 +115,16 @@ def transactions():
         ORDER BY c.name
     """, (account_id, account_id))
 
+    all_categories = query("""
+        SELECT category_id, name, type FROM Categories
+        WHERE user_id = %s ORDER BY type, name
+    """, (uid,))
+
+    all_tags = query("""
+        SELECT tag_id, name FROM Tags
+        WHERE user_id = %s ORDER BY name
+    """, (uid,))
+
     date_filter = ""
     date_params = []
     if start_date:
@@ -157,10 +167,17 @@ def transactions():
                     WHEN 'transfer' THEN -t.amount
                 END                                        AS signed_amount,
                 c.name                                     AS category,
+                t.category_id,
+                t.account_id                               AS account_id_orig,
+                t.counterparty_account_id,
                 (SELECT STRING_AGG(tg.name, ', ' ORDER BY tg.name)
                  FROM TransactionTags tt2
                  JOIN Tags tg ON tg.tag_id = tt2.tag_id
-                 WHERE tt2.transaction_id = t.transaction_id) AS tag_names
+                 WHERE tt2.transaction_id = t.transaction_id) AS tag_names,
+                (SELECT STRING_AGG(tt2.tag_id::text, ',' ORDER BY tg.name)
+                 FROM TransactionTags tt2
+                 JOIN Tags tg ON tg.tag_id = tt2.tag_id
+                 WHERE tt2.transaction_id = t.transaction_id) AS tag_ids_agg
             FROM Transactions t
             LEFT JOIN Accounts   cp ON cp.account_id  = t.counterparty_account_id
             LEFT JOIN Categories c  ON c.category_id  = t.category_id
@@ -179,10 +196,17 @@ def transactions():
                 TRUE                                       AS incoming,
                 t.amount                                   AS signed_amount,
                 c.name                                     AS category,
+                t.category_id,
+                t.account_id                               AS account_id_orig,
+                t.counterparty_account_id,
                 (SELECT STRING_AGG(tg.name, ', ' ORDER BY tg.name)
                  FROM TransactionTags tt2
                  JOIN Tags tg ON tg.tag_id = tt2.tag_id
-                 WHERE tt2.transaction_id = t.transaction_id) AS tag_names
+                 WHERE tt2.transaction_id = t.transaction_id) AS tag_names,
+                (SELECT STRING_AGG(tt2.tag_id::text, ',' ORDER BY tg.name)
+                 FROM TransactionTags tt2
+                 JOIN Tags tg ON tg.tag_id = tt2.tag_id
+                 WHERE tt2.transaction_id = t.transaction_id) AS tag_ids_agg
             FROM Transactions t
             JOIN Accounts     src ON src.account_id = t.account_id
             LEFT JOIN Categories c ON c.category_id = t.category_id
@@ -198,7 +222,11 @@ def transactions():
             l.transfer_label,
             l.incoming,
             l.category,
+            l.category_id,
+            l.account_id_orig,
+            l.counterparty_account_id,
             l.tag_names,
+            l.tag_ids_agg,
             a.initial_balance + SUM(l.signed_amount)
                 OVER (ORDER BY l.transaction_date, l.transaction_id) AS running_balance
         FROM ledger l
@@ -222,6 +250,7 @@ def transactions():
         start_date=start_date or '', end_date=end_date or '',
         tags=tags, tag_id=tag_id,
         categories=categories, category_id=category_id,
+        all_categories=all_categories, all_tags=all_tags,
         show_balance=show_balance,
         total_in=total_in, total_out=total_out, net=net)
 
@@ -604,6 +633,75 @@ def add_transaction():
         users=get_users(), uid=uid, user_name=get_user_name(uid),
         accounts=accounts, categories=categories, tags=tags,
         form={}, selected_tag_ids=[], today=str(date.today()))
+
+
+@app.route('/edit-transaction/<int:txn_id>', methods=['POST'])
+def edit_transaction(txn_id):
+    uid          = int(request.form['user_id'])
+    account_id   = int(request.form['account_id'])
+    typ          = request.form['type']
+    amount_raw   = request.form.get('amount', '').strip()
+    txn_date     = request.form.get('txn_date', '').strip() or str(date.today())
+    description  = request.form.get('description', '').strip() or None
+    category_id  = request.form.get('category_id') or None
+    counterparty = request.form.get('counterparty_account_id') or None
+    tag_ids      = request.form.getlist('tag_ids')
+    return_acct  = request.form.get('return_account_id') or str(account_id)
+
+    errors = []
+    try:
+        amount = float(amount_raw)
+        if amount <= 0:
+            errors.append('Amount must be positive.')
+    except ValueError:
+        errors.append('Invalid amount.')
+
+    if typ not in ('income', 'expense', 'transfer'):
+        errors.append('Invalid transaction type.')
+
+    if typ in ('income', 'expense'):
+        counterparty = None
+        if not category_id:
+            errors.append('Category is required for income and expense transactions.')
+    elif typ == 'transfer':
+        category_id = None
+        if not counterparty:
+            errors.append('Counterparty account is required for transfers.')
+        elif int(counterparty) == account_id:
+            errors.append('Cannot transfer to the same account.')
+
+    if not query("SELECT 1 FROM Transactions t JOIN Accounts a ON a.account_id = t.account_id WHERE t.transaction_id = %s AND a.user_id = %s", (txn_id, uid)):
+        errors.append('Transaction not found.')
+    elif not query("SELECT 1 FROM Accounts WHERE account_id = %s AND user_id = %s", (account_id, uid)):
+        errors.append('Account not found.')
+
+    if errors:
+        for e in errors:
+            flash(e, 'danger')
+        return redirect(url_for('transactions', user_id=uid, account_id=return_acct))
+
+    execute("""
+        UPDATE Transactions
+        SET account_id              = %s,
+            type                    = %s,
+            amount                  = %s,
+            transaction_date        = %s,
+            description             = %s,
+            category_id             = %s,
+            counterparty_account_id = %s
+        WHERE transaction_id = %s
+    """, (account_id, typ, amount, txn_date, description,
+          int(category_id) if category_id else None,
+          int(counterparty) if counterparty else None,
+          txn_id))
+
+    execute("DELETE FROM TransactionTags WHERE transaction_id = %s", (txn_id,))
+    for tid in tag_ids:
+        execute("INSERT INTO TransactionTags (transaction_id, tag_id) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                (txn_id, int(tid)))
+
+    flash('Transaction updated.', 'success')
+    return redirect(url_for('transactions', user_id=uid, account_id=return_acct))
 
 
 @app.route('/delete-transaction/<int:txn_id>', methods=['POST'])

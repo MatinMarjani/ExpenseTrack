@@ -120,12 +120,26 @@
             </td>
             {% endif %}
             <td class="text-end">
-                <form method="post" action="/delete-transaction/{{ t.transaction_id }}"
-                      onsubmit="return confirm('Delete this transaction?')">
-                    <input type="hidden" name="user_id"    value="{{ uid }}">
-                    <input type="hidden" name="account_id" value="{{ account_id }}">
-                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">&#128465;</button>
-                </form>
+                <div class="d-flex gap-1 justify-content-end">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            data-bs-toggle="modal" data-bs-target="#editModal"
+                            data-txn-id="{{ t.transaction_id }}"
+                            data-account-id="{{ t.account_id_orig }}"
+                            data-type="{{ t.type }}"
+                            data-amount="{{ '%.2f' | format(t.amount) }}"
+                            data-date="{{ t.transaction_date }}"
+                            data-description="{{ t.description or '' }}"
+                            data-category-id="{{ t.category_id or '' }}"
+                            data-counterparty-id="{{ t.counterparty_account_id or '' }}"
+                            data-tag-ids="{{ t.tag_ids_agg or '' }}"
+                            title="Edit">&#9998;</button>
+                    <form method="post" action="/delete-transaction/{{ t.transaction_id }}"
+                          onsubmit="return confirm('Delete this transaction?')">
+                        <input type="hidden" name="user_id"    value="{{ uid }}">
+                        <input type="hidden" name="account_id" value="{{ account_id }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">&#128465;</button>
+                    </form>
+                </div>
             </td>
         </tr>
         {% endfor %}
@@ -144,4 +158,155 @@
 {% else %}
 <div class="alert alert-info">No transactions found for the selected filters.</div>
 {% endif %}
+
+<!-- Edit Transaction Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="editForm" method="post">
+        <input type="hidden" name="user_id" value="{{ uid }}">
+        <input type="hidden" name="return_account_id" value="{{ account_id }}">
+        <div class="modal-header">
+            <h5 class="modal-title fw-semibold">Edit Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Account</label>
+                <select name="account_id" id="edit-account-id" class="form-select" required>
+                    {% for acc in accounts %}
+                    <option value="{{ acc.account_id }}">{{ acc.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Type</label>
+                <select name="type" id="edit-type" class="form-select" required
+                        onchange="onEditTypeChange()">
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                    <option value="transfer">Transfer</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Amount</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" name="amount" id="edit-amount" class="form-control"
+                           step="0.01" min="0.01" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Date</label>
+                <input type="date" name="txn_date" id="edit-date" class="form-control" required>
+            </div>
+            <div class="col-12">
+                <label class="form-label fw-semibold">Description</label>
+                <input type="text" name="description" id="edit-description"
+                       class="form-control" maxlength="255">
+            </div>
+            <div class="col-12" id="edit-category-row">
+                <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                <select name="category_id" id="edit-category-id" class="form-select">
+                    <option value="">-- Select Category --</option>
+                    {% for cat in all_categories %}
+                    <option value="{{ cat.category_id }}" data-type="{{ cat.type }}">
+                        {{ cat.name }} ({{ cat.type }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 d-none" id="edit-counterparty-row">
+                <label class="form-label fw-semibold">Transfer To <span class="text-danger">*</span></label>
+                <select name="counterparty_account_id" id="edit-counterparty-id" class="form-select">
+                    <option value="">-- Select Destination Account --</option>
+                    {% for acc in accounts %}
+                    <option value="{{ acc.account_id }}">{{ acc.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if all_tags %}
+            <div class="col-12">
+                <label class="form-label fw-semibold">Tags</label>
+                <div class="d-flex flex-wrap gap-2 border rounded p-2 bg-light">
+                    {% for tag in all_tags %}
+                    <div class="form-check me-2">
+                        <input class="form-check-input edit-tag-cb" type="checkbox"
+                               name="tag_ids" value="{{ tag.tag_id }}"
+                               id="edit-tag-{{ tag.tag_id }}">
+                        <label class="form-check-label" for="edit-tag-{{ tag.tag_id }}">
+                            {{ tag.name }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const editModal = document.getElementById('editModal');
+if (editModal) {
+    editModal.addEventListener('show.bs.modal', function(event) {
+        const btn = event.relatedTarget;
+        document.getElementById('editForm').action =
+            `/edit-transaction/${btn.dataset.txnId}`;
+
+        document.getElementById('edit-account-id').value  = btn.dataset.accountId;
+        document.getElementById('edit-amount').value       = btn.dataset.amount;
+        document.getElementById('edit-date').value         = btn.dataset.date;
+        document.getElementById('edit-description').value  = btn.dataset.description;
+
+        onEditTypeChange(btn.dataset.type);
+
+        document.getElementById('edit-category-id').value    = btn.dataset.categoryId || '';
+        document.getElementById('edit-counterparty-id').value = btn.dataset.counterpartyId || '';
+
+        const tagIds = btn.dataset.tagIds ? btn.dataset.tagIds.split(',') : [];
+        document.querySelectorAll('.edit-tag-cb').forEach(cb => {
+            cb.checked = tagIds.includes(cb.value);
+        });
+    });
+}
+
+function onEditTypeChange(forceType) {
+    const sel  = document.getElementById('edit-type');
+    const type = forceType || sel.value;
+    if (forceType) sel.value = forceType;
+
+    const catRow = document.getElementById('edit-category-row');
+    const cpRow  = document.getElementById('edit-counterparty-row');
+    const catSel = document.getElementById('edit-category-id');
+
+    if (type === 'transfer') {
+        catRow.classList.add('d-none');
+        cpRow.classList.remove('d-none');
+        catSel.removeAttribute('required');
+    } else {
+        catRow.classList.remove('d-none');
+        cpRow.classList.add('d-none');
+        catSel.setAttribute('required', '');
+    }
+
+    Array.from(catSel.options).forEach(opt => {
+        if (!opt.value) return;
+        opt.hidden = opt.dataset.type !== type;
+    });
+    if (catSel.selectedIndex > 0 && catSel.options[catSel.selectedIndex].hidden) {
+        catSel.value = '';
+    }
+}
+</script>
 {% endblock %}
